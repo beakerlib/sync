@@ -189,13 +189,8 @@ the synchronization storage over time.
 # doing anything but they can be overriden to perform task such as
 # read-only / read-write remounting if needed.
 
-function __syncMountShared {
-    return 0
-}
-
-function __syncUmountShared {
-    return 0
-}
+type __syncMountShared || function __syncMountShared { return 0; }
+type __syncUmountShared || function __syncUmountShared { return 0; }
 
 function __syncGet {
 
