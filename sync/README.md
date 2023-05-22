@@ -19,7 +19,7 @@ variable below).
 
 # GLOBAL VARIABLES
 
-- syncETH (set automatically, immutable)
+- syncETH (set automatically)
 
     NIC device which is used as a default route for machine IPv4/6 
     address stored in syncME. This is useful, for instance, when 
@@ -29,58 +29,58 @@ variable below).
 
     This is IPv6 variant of syncETH.
 
-- syncCLIENT (set automatically, immutable)
+- syncCLIENT (set automatically)
 
     IP address of the CLIENT. By default, IPv4 is preferred over IPv6
     address.
 
-- syncCLIENTv6 (set automatically, immutable)
+- syncCLIENTv6 (set automatically)
 
     IPv6 address of the CLIENT. If the CLIENT has no IPv6 address of
     a global scope, syncCLIENTv6 is empty.
 
-- syncME (set automatically, immutable)
+- syncME (set automatically)
 
     IP address of the actual machine running the test. By default, 
     IPv4 is preferred over IPv6 address.
 
-- syncMEv6 (set automatically, immutable)
+- syncMEv6 (set automatically)
 
     IPv6 address of the actual machine running the test. If the machine
     has no IPv6 address of a global scope, syncMEv6 is empty.
 
-- syncOTHER (set automatically, immutable)
+- syncOTHER (set automatically)
 
     IP address of the other machine running the test. By default, IPv4
     address is preferred over IPv6 address.
 
-- syncOTHERv6 (set automatically, immutable)
+- syncOTHERv6 (set automatically)
 
     IPv6 address of the other machine running the test. If the machine
     has no IPv6 address of a global scope, syncMEv6 is empty.
 
-- syncSERVER (set automatically, immutable)
+- syncSERVER (set automatically)
 
     IP address of the SERVER. By default, IPv4 address is preferred
     over IPv6 address.
 
-- syncSERVERv6 (set automatically, immutable)
+- syncSERVERv6 (set automatically)
 
     IPv6 address of the SERVER. If the SERVER has no IPv6 address of
     a global scope, syncSERVERv6 is empty.
 
-- syncROLE (set automatically, immutable)
+- syncROLE (set automatically)
 
     A role in a mutual communication played by the actual machine - 
     either CLIENT or SERVER.
 
-- syncTEST (set automatically, immutable)
+- syncTEST (set automatically)
 
     Unique test identifier (e.g. its name). By default, it is derived 
     from TEST variable exported in Makefile. If there is no Makefile 
     then it is derived from the test directory.
 
-- syncSHARE (mandatory, must be set by user)
+- syncSHARE (mandatory, no default)
 
     A directory pointing to the storage of all synchronization data 
     used during communication. The directory must be accessible from

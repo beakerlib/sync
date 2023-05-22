@@ -81,7 +81,7 @@ true <<'=cut'
 
 =over
 
-=item syncETH (set automatically, immutable)
+=item syncETH (set automatically)
 
 NIC device which is used as a default route for machine IPv4/6 
 address stored in syncME. This is useful, for instance, when 
@@ -91,58 +91,58 @@ sniffing traffic via tcpdump.
 
 This is IPv6 variant of syncETH.
 
-=item syncCLIENT (set automatically, immutable)
+=item syncCLIENT (set automatically)
 
 IP address of the CLIENT. By default, IPv4 is preferred over IPv6
 address.
 
-=item syncCLIENTv6 (set automatically, immutable)
+=item syncCLIENTv6 (set automatically)
 
 IPv6 address of the CLIENT. If the CLIENT has no IPv6 address of
 a global scope, syncCLIENTv6 is empty.
 
-=item syncME (set automatically, immutable)
+=item syncME (set automatically)
 
 IP address of the actual machine running the test. By default, 
 IPv4 is preferred over IPv6 address.
 
-=item syncMEv6 (set automatically, immutable)
+=item syncMEv6 (set automaticall)
 
 IPv6 address of the actual machine running the test. If the machine
 has no IPv6 address of a global scope, syncMEv6 is empty.
 
-=item syncOTHER (set automatically, immutable)
+=item syncOTHER (set automatically)
 
 IP address of the other machine running the test. By default, IPv4
 address is preferred over IPv6 address.
 
-=item syncOTHERv6 (set automatically, immutable)
+=item syncOTHERv6 (set automatically)
 
 IPv6 address of the other machine running the test. If the machine
 has no IPv6 address of a global scope, syncMEv6 is empty.
 
-=item syncSERVER (set automatically, immutable)
+=item syncSERVER (set automatically)
 
 IP address of the SERVER. By default, IPv4 address is preferred
 over IPv6 address.
 
-=item syncSERVERv6 (set automatically, immutable)
+=item syncSERVERv6 (set automatically)
 
 IPv6 address of the SERVER. If the SERVER has no IPv6 address of
 a global scope, syncSERVERv6 is empty.
 
-=item syncROLE (set automatically, immutable)
+=item syncROLE (set automatically)
 
 A role in a mutual communication played by the actual machine - 
 either CLIENT or SERVER.
 
-=item syncTEST (set automatically, immutable)
+=item syncTEST (set automatically)
 
 Unique test identifier (e.g. its name). By default, it is derived 
 from TEST variable exported in Makefile. If there is no Makefile 
 then it is derived from the test directory.
 
-=item syncSHARE (mandatory, must be set by user)
+=item syncSHARE (mandatory, no default)
 
 A directory pointing to the storage of all synchronization data 
 used during communication. The directory must be accessible from
@@ -181,7 +181,7 @@ the synchronization storage over time.
 =cut
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   Private Functions - used only withing lib.sh
+#   Private Functions - used only within lib.sh
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # These two private functions are called before (mount) and after
@@ -698,6 +698,17 @@ function syncIPv6 {
 
 function syncLibraryLoaded {
 
+    # Attempt to import internal environment where the following
+    # is set:
+    #
+    # - syncSHARE variable
+    # - __syncMountShared() function
+    # - __syncUmountShared() function
+    #
+    # Is is expected to fail without access to internal network and
+    # it only means that syncSHARE need to be set.
+    rlImport "distribution/sync-internal"
+
     # Check package requirements.
     if rlIsRHEL "7"; then
         pkg_tool="yum"
@@ -709,7 +720,7 @@ function syncLibraryLoaded {
         rlAssertRpm $R || return 1
     done
 
-    # Setting mutable global variables.
+    # Setting defaults for optional global variables.
     [ -z "$syncSLEEP" ] && syncSLEEP=5
     rlLog "$syncPREFIX: Setting syncSLEEP to $syncSLEEP seconds"
 
@@ -728,7 +739,8 @@ function syncLibraryLoaded {
     [ -z "$syncTTL" ] && syncTTL=600
     rlLog "$syncPREFIX: Setting syncTTL to $syncTTL minutes"
 
-    # Checking fixed global variables
+    # Checking that the following global variables are not set,
+    # They need to be set by the library!
     if [ -n "$syncME" ]; then
         rlLogError "$syncPREFIX: Setting syncME is not allowed!"
         return 1
@@ -749,12 +761,16 @@ function syncLibraryLoaded {
         rlLogError "$syncPREFIX: Setting syncSERVER is not allowed!"
         return 1
     fi
-    if [ -z "$syncSHARE" ]; then
-        rlLogError "$syncPREFIX: syncSHARE is not set!"
-        return 1
-    fi
-    
-    # SERVERS and CLIENTS variables must be set appropriately.
+
+    # Setting roles.
+    #
+    # In TMT roles are defined in FMF metadata and hence we need to
+    # propagate them to CLIENTS and SERVERS.
+    [ -n "${SERVERS}" ] || export SERVERS=${TMT_ROLE_SERVERS}
+    [ -n "${CLIENTS}" ] || export CLIENTS=${TMT_ROLE_CLIENTS}
+
+    # In Beaker we have CLIENTS and SERVERS variables set, we expect each
+    # of them to contain exactly one hostname or IP address.
     if [ $(echo "$CLIENTS" | wc -w) -eq 1 ]; then
 
         # IPv4/6 address of SERVER
@@ -875,15 +891,11 @@ function syncLibraryLoaded {
         return 1
     fi
 
-    rlLog "${syncPREFIX}: Setting syncROLE to \"${syncROLE}\""
-    rlLog "${syncPREFIX}: Setting syncME and syncME_IP to \"${syncME}\""
-    rlLog "${syncPREFIX}: Setting syncMEv6 and syncME_IPv6 to \"${syncMEv6}\""
-    rlLog "${syncPREFIX}: Setting syncOTHER and syncOTHER_IP to \"${syncOTHER}\""
-    rlLog "${syncPREFIX}: Setting syncOTHERv6 and syncOTHER_IPv6 to \"${syncOTHERv6}\""
-    rlLog "${syncPREFIX}: Setting syncME_HOSTNAME to \"${syncME_HOSTNAME}\""
-    rlLog "${syncPREFIX}: Setting syncOTHER_HOSTNAME to \"${syncOTHER_HOSTNAME}\""
-    
     # It must be possible to create a file in the storage location.
+    if [ -z "$syncSHARE" ]; then
+        rlLogError "${syncPREFIX}: syncSHARE is not set!"
+        return 1
+    fi
     if ! __syncMountShared; then
         rlLogError "$syncPREFIX: __syncMountShared() failed!"
         return 1
@@ -911,8 +923,17 @@ function syncLibraryLoaded {
     fi
     
     # Ready to go.
+    rlLog "${syncPREFIX}: Setting syncROLE to \"${syncROLE}\""
+    rlLog "${syncPREFIX}: Setting syncME and syncME_IP to \"${syncME}\""
+    rlLog "${syncPREFIX}: Setting syncMEv6 and syncME_IPv6 to \"${syncMEv6}\""
+    rlLog "${syncPREFIX}: Setting syncOTHER and syncOTHER_IP to \"${syncOTHER}\""
+    rlLog "${syncPREFIX}: Setting syncOTHERv6 and syncOTHER_IPv6 to \"${syncOTHERv6}\""
+    rlLog "${syncPREFIX}: Setting syncME_HOSTNAME to \"${syncME_HOSTNAME}\""
+    rlLog "${syncPREFIX}: Setting syncOTHER_HOSTNAME to \"${syncOTHER_HOSTNAME}\""
+    rlLog ""
     rlLog "$syncPREFIX: CLIENT is $CLIENTS ($syncCLIENT)"
     rlLog "$syncPREFIX: SERVER is $SERVERS ($syncSERVER)"
+    rlLog ""
     rlLog "$syncPREFIX: This test runs as $syncROLE"
 
     if [[ -n "$syncOTHER_IP" ]]; then
