@@ -28,7 +28,7 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   library-prefix = sync
-#   library-version = 8
+#   library-version = 9
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Library package requirements.
@@ -891,6 +891,15 @@ function syncLibraryLoaded {
         return 1
     fi
 
+    # Ready to go.
+    rlLog "${syncPREFIX}: Setting syncROLE to \"${syncROLE}\""
+    rlLog "${syncPREFIX}: Setting syncME and syncME_IP to \"${syncME}\""
+    rlLog "${syncPREFIX}: Setting syncMEv6 and syncME_IPv6 to \"${syncMEv6}\""
+    rlLog "${syncPREFIX}: Setting syncOTHER and syncOTHER_IP to \"${syncOTHER}\""
+    rlLog "${syncPREFIX}: Setting syncOTHERv6 and syncOTHER_IPv6 to \"${syncOTHERv6}\""
+    rlLog "${syncPREFIX}: Setting syncME_HOSTNAME to \"${syncME_HOSTNAME}\""
+    rlLog "${syncPREFIX}: Setting syncOTHER_HOSTNAME to \"${syncOTHER_HOSTNAME}\""
+
     # It must be possible to create a file in the storage location.
     if [ -z "$syncSHARE" ]; then
         rlLogError "${syncPREFIX}: syncSHARE is not set!"
@@ -922,14 +931,6 @@ function syncLibraryLoaded {
         return 1
     fi
     
-    # Ready to go.
-    rlLog "${syncPREFIX}: Setting syncROLE to \"${syncROLE}\""
-    rlLog "${syncPREFIX}: Setting syncME and syncME_IP to \"${syncME}\""
-    rlLog "${syncPREFIX}: Setting syncMEv6 and syncME_IPv6 to \"${syncMEv6}\""
-    rlLog "${syncPREFIX}: Setting syncOTHER and syncOTHER_IP to \"${syncOTHER}\""
-    rlLog "${syncPREFIX}: Setting syncOTHERv6 and syncOTHER_IPv6 to \"${syncOTHERv6}\""
-    rlLog "${syncPREFIX}: Setting syncME_HOSTNAME to \"${syncME_HOSTNAME}\""
-    rlLog "${syncPREFIX}: Setting syncOTHER_HOSTNAME to \"${syncOTHER_HOSTNAME}\""
     rlLog ""
     rlLog "$syncPREFIX: CLIENT is $CLIENTS ($syncCLIENT)"
     rlLog "$syncPREFIX: SERVER is $SERVERS ($syncSERVER)"
