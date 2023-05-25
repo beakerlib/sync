@@ -5,12 +5,33 @@ component: []
 test: ./runtest.sh
 framework: beakerlib
 require:
-    - library(distribution/LibrariesWrapper)
-    - library(distribution/sync-internal)
-recommend:
   - bind-utils
+recommend:
+  - wget
+  - curl
+  - python
+  - platform-python
 duration: 30m
 enabled: true
 extra-nitrate: TC#0388957
 extra-summary: '[sync] A simple synchronization library for two hosts (distribution/sync)'
 extra-task: /distribution/Library/sync
+
+
+# plan for testing the library
+provision:
+  - how: minute
+    image: fedora
+    role: server
+  - how: minute
+    image: fedora
+    role: client
+  - how: minute
+    image: fedora
+    role: controller
+discover:
+  - how: fmf
+    test:
+      - /sync
+execute:
+  - how: tmt
