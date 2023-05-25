@@ -1,0 +1,16 @@
+summary: A simple synchronization library for two hosts
+description: ''
+contact: Ondrej Moris <omoris@redhat.com>
+component: []
+test: ./runtest.sh
+framework: beakerlib
+require:
+    - library(distribution/LibrariesWrapper)
+    - library(distribution/sync-internal)
+recommend:
+  - bind-utils
+duration: 30m
+enabled: true
+extra-nitrate: TC#0388957
+extra-summary: '[sync] A simple synchronization library for two hosts (distribution/sync)'
+extra-task: /distribution/Library/sync
