@@ -587,30 +587,8 @@ other errors.
 
 function syncPut {
 
-    local rc=0
+    cat "$1" | syncSet "$(basename "$1")" -
 
-    if [ -z "$1" ] || [ ! -f "$1" ]; then
-        rlLogError "${syncPREFIX}: Missing file!"
-        return 2
-    fi
-
-    __syncMountShared
-    local T=$(basename $1)
-    if ls ${syncSHARE}/${syncTEST}-${syncME}-${syncOTHER}-${T}.sync >/dev/null 2>&1; then
-        rlLogError "${syncPREFIX}: File $T is already stored!"
-        rc=1
-    else
-        cp $1 ${syncSHARE}/${syncTEST}-${syncME}-${syncOTHER}-${T}.sync
-        if ! ls ${syncSHARE}/${syncTEST}-${syncME}-${syncOTHER}-${T}.sync >/dev/null 2>&1; then
-            rlLogError "${syncPREFIX}: $syncROLE cannot put $T"
-            rc=2
-        else
-            rlLog "${syncPREFIX}: $syncROLE put file $T"
-        fi
-    fi
-    __syncUmountShared
-
-    return $rc
 }
 
 true <<'=cut'
@@ -627,9 +605,16 @@ syncTIMEOUT global variable) and 2 in case of other errors.
 
 function syncGet {
 
-    syncExp "$@"
+    local file="$1" tmp=$(mktemp)
+    local res=0
 
-    return $?
+    syncExp "$@" > $tmp || let res++
+
+    if [[ $res -eq 0 ]]; then
+      mv "$tmp" "$file" || let res++
+    fi
+
+    return $res
 }
 
 true <<'=cut'
