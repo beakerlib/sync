@@ -767,8 +767,11 @@ function syncLibraryLoaded {
     # In TMT roles are defined in FMF metadata and hence we need to
     # propagate them to CLIENTS and SERVERS. Roles server and client
     # must be used in TMT plan.
-    [ -n "${SERVERS}" ] || export SERVERS=${TMT_GUESTS[server.hostname]}
-    [ -n "${CLIENTS}" ] || export CLIENTS=${TMT_GUESTS[client.hostname]}
+    if [ -f "$TMT_TOPOLOGY_SH" ]; then
+        source $TMT_TOPOLOGY_SH
+        export SERVERS=${TMT_GUESTS["server.hostname"]}
+        export CLIENTS=${TMT_GUESTS["client.hostname"]}
+    fi
 
     # In Beaker we have CLIENTS and SERVERS variables set, we expect each
     # of them to contain exactly one hostname or IP address.
