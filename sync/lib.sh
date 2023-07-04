@@ -767,8 +767,8 @@ function syncLibraryLoaded {
     # In TMT roles are defined in FMF metadata and hence we need to
     # propagate them to CLIENTS and SERVERS. Roles server and client
     # must be used in TMT plan.
-    if [ -f "$TMT_TOPOLOGY_SH" ]; then
-        source $TMT_TOPOLOGY_SH
+    if [ -f "$TMT_TOPOLOGY_BASH" ]; then
+        source $TMT_TOPOLOGY_BASH
         export SERVERS=${TMT_GUESTS["server.hostname"]}
         export CLIENTS=${TMT_GUESTS["client.hostname"]}
     fi
