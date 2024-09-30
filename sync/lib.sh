@@ -28,7 +28,7 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   library-prefix = sync
-#   library-version = 9
+#   library-version = 10
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Library package requirements.
@@ -673,19 +673,39 @@ function syncIPv6 {
         syncOTHERv6="$syncCLIENTv6"
     fi
 
+    if [ -z "$syncCLIENTv6" ] || [ -z "$syncSERVERv6" ] || [ -z "$syncMEv6" ] || [ -z "$syncOTHERv6" ]; then
+
+        rlLog "No IPv6 addresses, attempt to use GRE"
+        rlRun "ip link add tungre0 type gre local $syncME remote $syncOTHER"
+        syncRun "CLIENT" "ip addr add fd12:3456:789a:1::1 dev tungre0"
+        syncRun "SERVER" "ip addr add fd12:3456:789a:1::2 dev tungre0"
+        rlRun "ip link set tungre0 up"
+        rlRun "ip route add fd12:3456:789a:1::/64 dev tungre0"
+        syncSERVERv6="fd12:3456:789a:1::1"
+        syncCLIENTv6="fd12:3456:789a:1::2"
+        if syncClient; then
+            syncMEv6=$syncCLIENTv6
+            syncOTHERv6=$syncSERVERv6
+            rlRun "ping6 -c 3 $syncCLIENTv6"
+        else
+            syncMEv6=$syncSERVERv6
+            syncOTHERv6=$syncCLIENTv6
+            rlRun "ping6 -c 3 $syncSERVERv6"
+        fi
+        if [ "$?" -ne "0" ]; then
+            rlLogError "IPv6 addresses are not properly set."
+            return 1
+        fi
+    fi
+
     rlLog "========== NEW SETTINGS =========="
     rlLog "syncCLIENTv6 = ${syncCLIENTv6}"
     rlLog "syncSERVERv6 = ${syncSERVERv6}"
     rlLog "syncOTHERv6 = ${syncOTHERv6}"
     rlLog "syncMEv6 = ${syncMEv6}"
     rlLog "========== NEW SETTINGS =========="
-
-    if [ -z "$syncCLIENTv6" ] || [ -z "$syncSERVERv6" ] || [ -z "$syncMEv6" ] || [ -z "$syncOTHERv6" ]; then
-        rlLogError "IPv6 addresses are not properly set."
-        return 1
-    else
-        return 0
-    fi
+        
+    return 0
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
