@@ -1,0 +1,25 @@
+summary: Multihost test plan
+
+provision:
+  - name: server
+    role: server
+  - name: client
+    role: client
+
+prepare:
+  - name: Enable beaker-tasks
+    how: shell
+    script:
+      - dnf config-manager --enable beaker-tasks
+    where:
+      - server
+      - client
+
+discover:
+  - how: fmf
+    where:
+      - server
+      - client
+
+execute:
+  how: tmt
