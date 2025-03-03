@@ -735,10 +735,7 @@ function syncLibraryLoaded {
     else
         pkg_tool="dnf"
     fi
-    $pkg_tool install -y $syncREQUIRES --skip-broken
-    for R in $syncREQUIRES; do        
-        rlAssertRpm $R || return 1
-    done
+    $pkg_tool install -y $syncREQUIRES --skip-broken || return 1
 
     # Setting defaults for optional global variables.
     [ -z "$syncSLEEP" ] && syncSLEEP=5
