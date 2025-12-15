@@ -730,7 +730,7 @@ function syncLibraryLoaded {
     rlImport "distribution/sync-internal"
 
     # Check package requirements.
-    if rlIsRHEL "7"; then
+    if rlIsRHEL "<=7"; then
         pkg_tool="yum"
     else
         pkg_tool="dnf"
