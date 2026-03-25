@@ -5,8 +5,14 @@ component: []
 test: ./runtest.sh
 framework: beakerlib
 require:
-    - library(distribution/LibrariesWrapper)
-    - library(distribution/sync-internal)
+  - url: https://pkgs.devel.redhat.com/git/tests/distribution
+    type: library
+    name: /Library/LibrariesWrapper
+    ref: master
+  - url: https://pkgs.devel.redhat.com/git/tests/distribution
+    type: library
+    name: /Library/sync-internal
+    ref: master
 recommend:
   - bind-utils
 duration: 30m
